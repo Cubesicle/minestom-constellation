@@ -1,0 +1,10 @@
+bind = "127.0.0.1:30065"
+forwarding-secret = "secret"
+
+[servers]
+lobby = "127.0.0.1:30066"
+factions = "127.0.0.1:30067"
+minigames = "127.0.0.1:30068"
+thing1 = "127.0.0.1:30069"
+thing2 = "127.0.0.1:30070"
+thing3 = "127.0.0.1:30071"
