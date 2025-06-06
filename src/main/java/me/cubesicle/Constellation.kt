@@ -146,6 +146,7 @@ class Constellation(val stars: List<Star>, val origin: Point) {
         listeners.forEach {
             instance!!.eventNode().removeListener(it)
         }
+        instance!!.players.firstOrNull()?.let { sidebar.removeViewer(it) }
         stars.forEach {
             it.remove()
         }
@@ -155,6 +156,7 @@ class Constellation(val stars: List<Star>, val origin: Point) {
 
     fun updateSidebar() {
         val player = instance?.players?.firstOrNull() ?: return
+
         if (selectedStar != null) {
             val stat = serverStats[selectedStar!!.name]
             val mm = MiniMessage.miniMessage()
