@@ -12,11 +12,11 @@ class SphericalPoint(val distance: Double, val theta: Double, val phi: Double) {
     companion object {
         fun random(distanceRange: Range.Double, thetaRange: Range.Double, phiRange: Range.Double): SphericalPoint {
             val d = if (distanceRange.min == distanceRange.max) distanceRange.min
-                else Random.nextDouble(distanceRange.min, distanceRange.max)
+            else Random.nextDouble(distanceRange.min, distanceRange.max)
             val t = if (thetaRange.min == thetaRange.max) thetaRange.min
-                else acos(Random.nextDouble(cos(thetaRange.max), cos(thetaRange.min)))
+            else acos(Random.nextDouble(cos(thetaRange.max), cos(thetaRange.min)))
             val p = if (phiRange.min == phiRange.max) phiRange.min
-                else Random.nextDouble(phiRange.min, phiRange.max)
+            else Random.nextDouble(phiRange.min, phiRange.max)
 
             return SphericalPoint(d, t, p)
         }

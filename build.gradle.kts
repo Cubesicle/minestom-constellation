@@ -15,6 +15,7 @@ repositories {
 dependencies {
     implementation("com.akuleshov7:ktoml-core:0.7.0")
     implementation("com.akuleshov7:ktoml-file:0.7.0")
+    implementation("net.kyori:adventure-text-minimessage:4.18.0")
     implementation("net.minestom:minestom-snapshots:d1634fb586")
     implementation ("org.slf4j:slf4j-simple:2.0.3")
     implementation(kotlin("stdlib-jdk8"))

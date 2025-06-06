@@ -15,10 +15,11 @@ import net.minestom.server.utils.Range
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
+import kotlin.concurrent.fixedRateTimer
 import kotlin.io.path.Path
 import kotlin.math.PI
 
-val logger: Logger = LoggerFactory.getLogger(::main::class.java.name.split('$')[0])
+val logger: Logger = LoggerFactory.getLogger(::main.javaClass.name.split('$')[0])
 
 val config = run {
     val configPath = Path("config.toml")
@@ -83,14 +84,22 @@ fun main() {
         instanceManager.unregisterInstance(instance)
     }
 
-    val parsedAddress = config.bind.split(':')
-    minecraftServer.start(parsedAddress[0], parsedAddress[1].toInt())
-    logger.info("Listening on ${config.bind}")
+    fixedRateTimer("Server Pinger", false, 0, 1000) {
+        Constellation.updateServerStats()
+        constellationMap.values.forEach {
+            it.updateSidebar()
+        }
+    }
+
+    val host = config.bind.hostName
+    val port = config.bind.port
+    minecraftServer.start(host, port)
+    logger.info("Listening on $host:$port")
 }
 
 fun createConstellation(instance: Instance) {
     val constellation = Constellation.random(
-        config.servers.keys,
+        config.servers,
         spawnPoint.withY(spawnPoint.y + EntityType.PLAYER.registry().eyeHeight()),
         10.0,
         Range.Double(4 * PI / 11 - PI / 4, 7 * PI / 11 - PI / 4),
