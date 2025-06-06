@@ -85,9 +85,9 @@ fun main() {
     }
 
     fixedRateTimer("Server Pinger", false, 0, 1000) {
-        Constellation.updateServerStats()
+        ServerStats.update()
         constellationMap.values.forEach {
-            it.updateSidebar()
+            it.updateServerStats()
         }
     }
 

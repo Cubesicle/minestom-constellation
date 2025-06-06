@@ -20,13 +20,10 @@ import net.minestom.server.particle.Particle
 import net.minestom.server.scoreboard.Sidebar
 import net.minestom.server.utils.Range
 import java.net.InetSocketAddress
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.PI
 
 class Constellation(val stars: List<Star>, val origin: Point) {
     companion object {
-        val serverStats = ConcurrentHashMap<String, Pinger>()
-
         fun random(
             servers: Map<String, InetSocketAddress>,
             origin: Point,
@@ -47,17 +44,6 @@ class Constellation(val stars: List<Star>, val origin: Point) {
                 )
             }
             return Constellation(stars, origin)
-        }
-
-        fun updateServerStats() {
-            config.servers.forEach { (name, address) ->
-                val pinger = Pinger(address.hostName, address.port)
-                if (pinger.fetchData()) {
-                    serverStats[name] = pinger
-                } else {
-                    serverStats.remove(name)
-                }
-            }
         }
     }
 
@@ -87,8 +73,8 @@ class Constellation(val stars: List<Star>, val origin: Point) {
                 val nextStar = stars[(i + 1) % stars.size]
                 val startPoint = origin.add(star.point.cartesianPoint)
                 val endPoint = origin.add(nextStar.point.cartesianPoint)
-                val startScale = if (serverStats[star.name] != null) 0.25f else 0f
-                val endScale = if (serverStats[nextStar.name] != null) 0.25f else 0f
+                val startScale = if (ServerStats.stats[star.name] != null) 0.25f else 0f
+                val endScale = if (ServerStats.stats[nextStar.name] != null) 0.25f else 0f
                 drawLine(event.instance, startPoint, endPoint, startScale, endScale, 0.05)
             }
         }.build(),
@@ -154,29 +140,11 @@ class Constellation(val stars: List<Star>, val origin: Point) {
         instance = null
     }
 
-    fun updateSidebar() {
-        val player = instance?.players?.firstOrNull() ?: return
-
-        if (selectedStar != null) {
-            val stat = serverStats[selectedStar!!.name]
-            val mm = MiniMessage.miniMessage()
-            sidebar.setTitle(Component.text(selectedStar!!.name))
-            sidebar.updateLineContent(
-                "1",
-                mm.deserialize("Status: ${if (stat != null) "<green>Online" else "<red>Offline"}")
-            )
-            sidebar.updateLineContent(
-                "2",
-                Component.text("Players: ${if (stat?.playersOnline != null) stat.playersOnline else "???"}")
-            )
-            sidebar.updateLineContent(
-                "3",
-                Component.text("Version: ${if (stat?.gameVersion != null) stat.gameVersion else "???"}")
-            )
-            sidebar.addViewer(player)
-        } else {
-            sidebar.removeViewer(player)
+    fun updateServerStats() {
+        stars.forEach {
+            it.updateDisplayName()
         }
+        updateSidebar()
     }
 
     private fun drawLine(
@@ -201,6 +169,31 @@ class Constellation(val stars: List<Star>, val origin: Point) {
         }
     }
 
+    private fun updateSidebar() {
+        val player = instance?.players?.firstOrNull() ?: return
+
+        if (selectedStar != null) {
+            val stat = ServerStats.stats[selectedStar!!.name]
+            val mm = MiniMessage.miniMessage()
+            sidebar.setTitle(Component.text(selectedStar!!.name))
+            sidebar.updateLineContent(
+                "1",
+                mm.deserialize("Status: ${if (stat != null) "<green>Online" else "<red>Offline"}")
+            )
+            sidebar.updateLineContent(
+                "2",
+                Component.text("Players: ${if (stat?.playersOnline != null) stat.playersOnline else "???"}")
+            )
+            sidebar.updateLineContent(
+                "3",
+                Component.text("Version: ${if (stat?.gameVersion != null) stat.gameVersion else "???"}")
+            )
+            sidebar.addViewer(player)
+        } else {
+            sidebar.removeViewer(player)
+        }
+    }
+
     class Star(val name: String, val point: SphericalPoint) {
         var isGlowing = false
             set(value) {
@@ -211,10 +204,15 @@ class Constellation(val stars: List<Star>, val origin: Point) {
         private val entity = Entity(EntityType.SHULKER_BULLET)
 
         fun setInstance(instance: Instance, origin: Point) {
-            entity.customName = Component.text(name)
+            updateDisplayName()
             entity.isCustomNameVisible = true
             entity.setNoGravity(true)
             entity.setInstance(instance, origin.add(point.cartesianPoint))
+        }
+
+        fun updateDisplayName() {
+            val mm = MiniMessage.miniMessage()
+            entity.customName = mm.deserialize(if (ServerStats.stats[name] != null) name else "<dark_gray>$name")
         }
 
         fun remove() {
