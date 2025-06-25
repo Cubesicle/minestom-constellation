@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "me.cubesicle"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -15,9 +15,9 @@ repositories {
 dependencies {
     implementation("com.akuleshov7:ktoml-core:0.7.0")
     implementation("com.akuleshov7:ktoml-file:0.7.0")
-    implementation("net.kyori:adventure-text-minimessage:4.18.0")
-    implementation("net.minestom:minestom-snapshots:d1634fb586")
-    implementation ("org.slf4j:slf4j-simple:2.0.3")
+    implementation("net.kyori:adventure-text-minimessage:4.23.0")
+    implementation("net.minestom:minestom-snapshots:1_21_6-a40d7115d4")
+    implementation ("org.slf4j:slf4j-simple:2.0.16")
     implementation(kotlin("stdlib-jdk8"))
 }
 
